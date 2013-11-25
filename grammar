@@ -1,0 +1,51 @@
+App = Expr+
+Expr = Application / Literal
+Application = lparen op:Expr  args:Expr* rparen {
+ return ['application', {
+  op: op,
+  args: args
+ }];
+}
+Literal  = Nil / String / Symbol / Number / Char / Vec
+Vec = lbrack elements:Expr* rbrack {
+ return ['vec', elements];
+}
+Nil = 'nil' ws {
+ return ['nil'];
+}
+Char = '\\' char:[A-Za-z0-9] ws {
+ return ['char', char];
+}
+String = '"' chars:[^"]* '"' ws {
+ var str = chars.join('');
+ return ['string', str];
+}
+Symbol = a:symcharpref chars:symchar* ws {
+ var id = a + chars.join('');
+ return ['symbol', id];
+}
+Number = num:(Float / Integer) {
+ return ['number', num];
+}
+Float = a:digit+ '.' b:digit+ ws {
+ var num = parseFloat(a.join('') + '.' + b.join(''));
+ return ['float', num];
+}
+
+Integer = digits:digit+ ws {
+ var num = parseInt(digits.join(''));
+ return ['int', num];
+}
+symchar = symcharpref / [0-9]
+symcharpref = [A-Za-z\?\-\>\<\=\!_+/\*]
+digit = [0-9]
+lparen = '(' ws
+rparen = ')' ws
+lbrace = '{' ws
+rbrace = '}' ws
+lbrack = '[' ws
+rbrack = ']' ws
+colon = ':'
+
+ws = wchar*
+wchar = [ \r\n\t,]
